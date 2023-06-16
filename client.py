@@ -3,9 +3,10 @@ import json
 
 def connect_to_server():
     server_ip = input("Ingrese la IP del servidor: ")
+    server_port = int(input("Ingrese el puerto del servidor: "))
     
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect((server_ip, 4200))
+    client_socket.connect((server_ip, server_port))
     
     return client_socket
 
@@ -157,7 +158,7 @@ def modify_employee(client_socket):
     new_employee_name = input("Ingrese el nuevo nombre del empleado: ")
     new_employee_surname = input("Ingrese el nuevo apellido del empleado: ")
     new_employee_email = input("Ingrese el nuevo email del empleado: ")
-    new_employee_birth_date = input("Ingrese la nueva fecha de naciemiento del empleado: ")
+    new_employee_birth_date = input("Ingrese la nueva fecha de nacimiento del empleado: ")
     new_employee_salary = input("Ingrese el nuevo sueldo del empleado: ")
     new_employee_commission = input("Ingrese la nueva comisión del empleado: ")
     new_employee_position_id = input("Ingrese el nuevo ID del cargo del empleado: ")

@@ -47,20 +47,60 @@ def modify_employee(db_connection, employee_data):
 
         # Verificar si el email de el empleado ya está en uso
         query = "SELECT empl_email FROM empleados WHERE empl_email = %s AND empl_id != %s"
-        cursor.execute(query, (employee_data["empl_email"], employee_data["employee_id"]))
+        cursor.execute(query, (employee_data["employee_email"], employee_data["employee_id"]))
         duplicate_employee = cursor.fetchone()
 
         if duplicate_employee:
             return "Ya existe otro empleado con el mismo email."
 
-        if employee_data["employee_boss_id"]:
-            # Actualizar el nombre del empleado en la base de datos
-            update_query = "UPDATE empleados SET empl_primer_nombre = %s, empl_segundo_nombre = %s, empl_email = %s, empl_fecha_nac = %s, empl_sueldo = %s, empl_comision = %s, empl_cargo_id = %s, empl_gerente_id = %s, empl_dpto_id = %s, empl_localiz_id = %s WHERE empl_id = %s"
-            cursor.execute(update_query, (employee_data["employee_name"], employee_data["employee_surname"], employee_data["employee_email"], employee_data["employee_birth_date"], employee_data["employee_salary"], employee_data["employee_commission"], employee_data["employee_position_id"], employee_data["employee_boss_id"], employee_data["employee_department_id"], employee_data["employee_location_id"]))
-        else: 
-            # Actualizar el nombre del empleado en la base de datos
-            update_query = "UPDATE empleados SET empl_primer_nombre = %s, empl_segundo_nombre = %s, empl_email = %s, empl_fecha_nac = %s, empl_sueldo = %s, empl_comision = %s, empl_cargo_id = %s, empl_dpto_id = %s, empl_localiz_id = %s WHERE empl_id = %s"
-            cursor.execute(update_query, (employee_data["employee_name"], employee_data["employee_surname"], employee_data["employee_email"], employee_data["employee_birth_date"], employee_data["employee_salary"], employee_data["employee_department_id"], employee_data["employee_location_id"]))
+        update_query = "UPDATE empleados SET "
+        params = []
+        query_parts = []
+
+        # Validar si un valor viene para incluirlo en el query
+        if employee_data.get("employee_name"):
+            query_parts.append("empl_primer_nombre = %s")
+            params.append(employee_data.get("employee_name"))
+        if employee_data.get("employee_surname"):
+            query_parts.append("empl_segundo_nombre = %s")
+            params.append(employee_data.get("employee_surname"))
+        if employee_data.get("employee_email"):
+            query_parts.append("empl_email = %s")
+            params.append(employee_data.get("employee_email"))
+        if employee_data.get("employee_birth_date"):
+            query_parts.append("empl_fecha_nac = %s")
+            params.append(employee_data.get("employee_birth_date"))
+        if employee_data.get("employee_salary"):
+            query_parts.append("empl_sueldo = %s")
+            params.append(employee_data.get("employee_salary"))
+        if employee_data.get("employee_commission"):
+            query_parts.append("empl_comision = %s")
+            params.append(employee_data.get("employee_commission"))
+        if employee_data.get("employee_position_id"):
+            query_parts.append("empl_cargo_id = %s")
+            params.append(employee_data.get("employee_position_id"))
+        if employee_data.get("employee_department_id"):
+            query_parts.append("empl_dpto_id = %s")
+            params.append(employee_data.get("employee_department_id"))
+        if employee_data.get("employee_boss_id"):
+            query_parts.append("empl_gerente_id = %s")
+            params.append(employee_data.get("employee_boss_id"))
+        if employee_data.get("employee_location_id"):
+            query_parts.append("empl_localiz_id = %s")
+            params.append(employee_data.get("employee_location_id"))
+
+
+        # Combinar las partes del query
+        update_query += ", ".join(query_parts)
+
+        # Agregar la condición WHERE
+        update_query += " WHERE empl_id = %s"
+
+        # Agregar el valor de employee_id a los parámetros
+        params.append(employee_data["employee_id"])
+
+        # Ejecutar el query con los parámetros
+        cursor.execute(update_query, tuple(params))
 
         # Guardar los cambios en la base de datos
         db_connection.commit()
@@ -106,7 +146,7 @@ def search_employee(db_connection, employee_id):
         # Formatear la lista de empleados como una cadena de texto
         employee_list = "\n".join([str(employee[0]) + " | " + str(employee[1]) + " | " + str(employee[2]) + " | " + str(employee[3]) + " | " + str(employee[4]) + " | " + str(employee[5]) + " | " + str(employee[6]) + " | " + str(employee[7]) + " | " + str(employee[8]) + " | " + str(employee[9]) + " | " + str(employee[10]) + " | " + str(employee[11]) for employee in employees])
 
-        return f"Información Empleado:\nID | Nombre | Apellido | Email | Fecha Nac. | Sueldo | Comisión | Departamento | Cargo | Ciudad | Localización \n{employee_list}"
+        return f"Información Empleado:\nID | Nombre | Apellido | Email | Fecha Nac. | Sueldo | Comisión | Departamento | Cargo | Ciudad | Localización | Estado \n{employee_list}"
 
     except mysql.connector.Error as error:
         return f"Error al obtener la lista de empleados: {error}"
